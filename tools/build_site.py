@@ -1,11 +1,13 @@
 """Builds the website's pictures (img/) and the playable game (jogar/) from the game repo.
 
-Usage: python tools/build_site.py [--no-game]
+Usage: python tools/build_site.py [--no-game | --game-only]
 
 Needs the game repo at GAME, built with `npm run build`. The gallery comes from its
 screenshots: `npm run test:e2e -- --build` (Portuguese, test-results/) and
 `npm run test:e2e -- --build --lang=en` (English, test-results/en/).
+`--game-only` replaces only jogar/, preserving all website pictures and screenshot overrides.
 """
+import argparse
 import shutil
 import sys
 from pathlib import Path
@@ -65,7 +67,7 @@ def shot(folder, name, lang):
     return Image.open(found[-1]).convert("RGB")
 
 
-def main():
+def build_pictures():
     IMG.mkdir(exist_ok=True)
     for name, (src, width) in PAINTINGS.items():
         webp(Image.open(ASSETS / src).convert("RGB"), name, width)
@@ -85,14 +87,58 @@ def main():
         webp(shot(GAME / "test-results" / "en", test, "en"), f"{name}-en", 960)
     print("pictures:", len(list(IMG.iterdir())), "files in", IMG)
 
-    if "--no-game" not in sys.argv:
-        dist = GAME / "dist"
-        if not (dist / "index.html").exists():
-            sys.exit("the game isn't built: run `npm run build` in the game repo")
-        shutil.rmtree(SITE / "jogar", ignore_errors=True)
-        shutil.copytree(dist, SITE / "jogar")
-        size = sum(f.stat().st_size for f in (SITE / "jogar").rglob("*") if f.is_file())
-        print(f"game: jogar/ ({size / 1e6:.0f} MB)")
 
 
-main()
+def game_destination():
+    """Resolve and verify the sole recursive-delete target before touching it.
+
+    Reject a linked/junction destination as well as any unexpected parent/name;
+    the public site's gallery and custom directories are outside this scope.
+    """
+    site_root = SITE.resolve(strict=True)
+    destination = SITE / "jogar"
+    try:
+        resolved = destination.resolve(strict=False)
+        expected = site_root / "jogar"
+        if destination.parent.resolve(strict=True) != site_root or destination.name != "jogar":
+            raise ValueError("unexpected game destination parent or name")
+        if not resolved.is_absolute() or resolved != expected or site_root not in resolved.parents:
+            raise ValueError("game destination resolves outside the intended jogar directory")
+        # Python 3.12+ exposes junctions separately from symlinks on Windows.
+        if destination.is_symlink() or getattr(destination, "is_junction", lambda: False)():
+            raise ValueError("linked/junction game destination is not permitted")
+        if destination.exists() and not destination.is_dir():
+            raise ValueError("game destination exists but is not a directory")
+    except (OSError, RuntimeError, ValueError) as error:
+        sys.exit(f"refusing game replacement at {destination}: {error}")
+    return resolved
+
+
+def build_game():
+    dist = (GAME / "dist").resolve(strict=False)
+    if not (dist / "index.html").is_file():
+        sys.exit("the game isn't built: run `npm run build` in the game repo")
+    destination = game_destination()
+    print("game source:", dist)
+    print("game destination:", destination)
+    if destination.exists():
+        shutil.rmtree(destination)
+    shutil.copytree(dist, destination)
+    size = sum(f.stat().st_size for f in destination.rglob("*") if f.is_file())
+    print(f"game: jogar/ ({size / 1e6:.0f} MB)")
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--no-game", action="store_true", help="Rebuild only website pictures, preserving jogar/.")
+    mode.add_argument("--game-only", action="store_true", help="Replace only jogar/; preserve gallery pictures and screenshot overrides.")
+    args = parser.parse_args(argv)
+    if not args.game_only:
+        build_pictures()
+    if not args.no_game:
+        build_game()
+
+
+if __name__ == "__main__":
+    main()

@@ -22,3 +22,5 @@ This repository holds only what is public: the website and the playable game, se
 - The Windows ZIP is a release asset, never committed. Make it in the game repo with `npm run package:win -- --check` (it lands in `release/`), then attach it to a new release here under the same file name, so the download link keeps working.
 
 To publish a new version of the game: build it, run `python tools/build_site.py`, commit `jogar/` (and `img/` if it changed), push, and upload the new ZIP to a new release.
+
+For a game-only patch, build and run the checks appropriate to the change in the private game repo, then run `python tools/build_site.py --game-only` here. It replaces only `jogar/` and preserves all gallery pictures. Use the default command above when gallery pictures need refreshing; `--game-only` and `--no-game` cannot be combined. The builder validates the resolved `jogar/` destination before replacing it.
