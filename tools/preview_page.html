@@ -1,0 +1,565 @@
+<title>Alice no País das Maravilhas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Um jogo gratuito em onze episódios, baseado no livro de Lewis Carroll. Em português e em inglês, no navegador ou no Windows.">
+<link rel="icon" type="image/png" href="img/icon-64.png">
+<link rel="apple-touch-icon" href="img/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,700;1,400&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap">
+<style>
+/* Layout: a storybook opened in the dark of the rabbit-hole. Parchment pages on deep
+   brown, the game's own colours and type; the eleven episodes are dealt as the Queen
+   of Hearts' cards, Ace to Knave. One fixed look, as in the game, so single-theme. */
+:root {
+  --hole: #1c1410;
+  --hole-2: #261b14;
+  --hole-3: #3a2a1e;
+  --parchment: #f3e6c8;
+  --parchment-dim: #cdbb98;
+  --ink: #2a1a10;
+  --ink-soft: #5e4630;
+  --gold: #d2aa58;
+  --gold-deep: #9a7330;
+  --red: #7a2e1c;
+  --red-lit: #96402a;
+  --heart: #b3261e;
+  --card: #fbf5e6;
+
+  --display: "IM Fell English", "Iowan Old Style", Georgia, serif;
+  --caps: "IM Fell English SC", "IM Fell English", Georgia, serif;
+  --body: "Alegreya", "Iowan Old Style", Georgia, serif;
+
+  --step--1: 0.95rem;
+  --step-0: 1.125rem;
+  --step-1: 1.35rem;
+  --step-2: 1.8rem;
+  --step-3: clamp(2.2rem, 4.6vw, 3.2rem);
+  --step-4: clamp(2.9rem, 8vw, 5.6rem);
+
+  color-scheme: dark;
+}
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+/* Only the chosen language shows (Portuguese until the script decides). */
+:root:not([data-lang="en"]) [lang="en"],
+:root[data-lang="en"] [lang="pt-BR"] { display: none !important; }
+
+body {
+  background: var(--hole);
+  color: var(--parchment);
+  font-family: var(--body);
+  font-size: var(--step-0);
+  line-height: 1.6;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--hole);
+}
+
+h1, h2, h3 { font-family: var(--display); font-weight: 400; line-height: 1.08; text-wrap: balance; margin: 0; }
+h2 { font-size: var(--step-3); }
+h3 { font-size: var(--step-1); }
+p { margin: 0; }
+a { color: var(--gold); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; border-radius: 6px; }
+img { display: block; max-width: 100%; height: auto; }
+
+.wrap {
+  max-width: 1140px; margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.band { padding-block: clamp(56px, 8vw, 100px); }
+.label {
+  font-family: var(--caps); font-size: var(--step-1); letter-spacing: 0.04em;
+  color: var(--gold);
+}
+.lede { max-width: 62ch; color: var(--parchment-dim); margin-top: 14px; }
+
+/* ---------------------------------------------------------------- top bar */
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: color-mix(in srgb, var(--hole) 94%, transparent);
+  border-bottom: 1px solid var(--hole-3);
+}
+.topbar .wrap { display: flex; align-items: center; gap: 16px 24px; min-height: 58px; flex-wrap: wrap; }
+.brand { font-family: var(--display); font-size: 1.5rem; color: var(--parchment); text-decoration: none; white-space: nowrap; }
+.brand span { color: var(--heart); }
+.topbar nav { display: flex; gap: 6px 20px; flex-wrap: wrap; margin-left: auto; }
+.topbar nav a { color: var(--parchment-dim); text-decoration: none; font-size: var(--step--1); }
+.topbar nav a:hover { color: var(--parchment); }
+.langs { display: flex; border: 1px solid var(--gold-deep); border-radius: 999px; overflow: hidden; }
+.langs button {
+  font: inherit; font-family: var(--caps); font-size: 0.95rem; letter-spacing: 0.05em;
+  background: none; color: var(--parchment-dim); border: 0; padding: 4px 12px; cursor: pointer;
+}
+.langs button[aria-pressed="true"] { background: var(--gold-deep); color: var(--hole); }
+@media (max-width: 720px) { .topbar nav { display: none; } .langs { margin-left: auto; } }
+
+/* ---------------------------------------------------------------- hero */
+.hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--hole-3); }
+.hero > img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% 50%;
+}
+.hero::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(28, 20, 16, 0.94) 0%, rgba(28, 20, 16, 0.78) 38%, rgba(28, 20, 16, 0.1) 72%);
+}
+.hero .wrap { position: relative; z-index: 1; padding-block: clamp(64px, 11vw, 150px); }
+.hero-copy { max-width: 600px; display: grid; gap: 22px; }
+.hero h1 { font-size: var(--step-4); color: var(--parchment); text-shadow: 0 2px 18px rgba(0, 0, 0, 0.5); }
+.hero .lede { color: var(--parchment); font-size: var(--step-1); margin: 0; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--body); font-size: var(--step-1); line-height: 1.2;
+  padding: 13px 26px; border-radius: 999px; text-decoration: none;
+  border: 2px solid var(--gold); color: var(--parchment); background: rgba(28, 20, 16, 0.55);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn.primary { background: var(--red); border-color: var(--parchment); }
+.btn.primary:hover { background: var(--red-lit); }
+.btn small { font-size: var(--step--1); color: var(--parchment-dim); }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: var(--step--1); color: var(--parchment-dim); }
+.facts li { list-style: none; }
+.facts li + li::before { content: "♥"; color: var(--heart); margin-right: 18px; font-size: 0.8em; }
+ul.facts { margin: 0; padding: 0; }
+@media (max-width: 720px) {
+  .hero > img { object-position: 78% 50%; }
+  .hero::after { background: linear-gradient(180deg, rgba(28, 20, 16, 0.55) 0%, rgba(28, 20, 16, 0.92) 55%); }
+}
+
+/* ---------------------------------------------------------------- the story (a parchment page) */
+.page { background: var(--parchment); color: var(--ink); }
+.page .label { color: var(--red); }
+.page .lede { color: var(--ink-soft); }
+.page a { color: var(--red); }
+.story { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
+.story h2 { color: var(--ink); margin-top: 6px; }
+.story-copy { display: grid; gap: 16px; min-width: 0; }
+.story-copy .opening::first-letter {
+  font-family: var(--display); float: left; font-size: 3.6em; line-height: 0.8; padding: 6px 10px 0 0; color: var(--red);
+}
+.story figure { margin: 0; }
+.story figure img { border-radius: 10px; border: 6px solid var(--card); box-shadow: 0 10px 30px rgba(42, 26, 16, 0.3); transform: rotate(1.5deg); }
+.story figcaption { font-style: italic; color: var(--ink-soft); font-size: var(--step--1); margin-top: 12px; text-align: center; }
+@media (max-width: 800px) { .story { grid-template-columns: 1fr; } }
+
+/* ---------------------------------------------------------------- the deck of episodes */
+.deck { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 22px; margin-top: 40px; }
+.card {
+  position: relative; background: var(--card); color: var(--ink);
+  border-radius: 14px; padding: 40px 16px 44px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 8px 22px rgba(0, 0, 0, 0.35);
+  display: grid; gap: 10px; align-content: start; min-width: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover { transform: translateY(-6px) rotate(-1.2deg); box-shadow: 0 16px 30px rgba(0, 0, 0, 0.45); }
+.rank {
+  position: absolute; font-family: var(--display); color: var(--heart); line-height: 0.9;
+  text-align: center; font-size: 1.55rem; width: 1.6em;
+}
+.rank span { display: block; font-size: 0.75em; }
+.rank.top { top: 10px; left: 8px; }
+.rank.bottom { bottom: 10px; right: 8px; transform: rotate(180deg); }
+.card img { border-radius: 6px; aspect-ratio: 16 / 9; object-fit: cover; width: 100%; border: 1px solid #d9cba8; }
+.card .ep { font-family: var(--caps); font-size: var(--step--1); letter-spacing: 0.05em; color: var(--heart); }
+.card h3 { font-size: 1.4rem; color: var(--ink); }
+.card p { font-size: var(--step--1); color: var(--ink-soft); line-height: 1.5; }
+
+/* ---------------------------------------------------------------- characters */
+.cast { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 28px 22px; margin-top: 40px; }
+.cast figure { margin: 0; display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; align-items: center; }
+.cast img { width: 96px; height: 96px; border-radius: 50%; border: 3px solid var(--gold-deep); background: var(--parchment); }
+.cast figcaption { display: grid; gap: 2px; min-width: 0; }
+.cast b { font-family: var(--display); font-weight: 400; font-size: 1.3rem; color: var(--parchment); }
+.cast span { color: var(--parchment-dim); font-size: var(--step--1); line-height: 1.45; }
+
+/* ---------------------------------------------------------------- pictures */
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; margin-top: 40px; }
+.gallery figure { margin: 0; min-width: 0; }
+.gallery img { border-radius: 10px; aspect-ratio: 16 / 9; object-fit: cover; width: 100%; border: 1px solid var(--hole-3); }
+.gallery figcaption { font-size: var(--step--1); color: var(--parchment-dim); margin-top: 8px; }
+
+/* ---------------------------------------------------------------- families and the book */
+.two { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); }
+.two h2 { color: var(--ink); margin-top: 6px; margin-bottom: 18px; }
+.notes { margin: 0; padding: 0; display: grid; gap: 12px; }
+.notes li { list-style: none; padding-left: 28px; position: relative; }
+.notes li::before { content: "♥"; position: absolute; left: 0; top: 0; color: var(--heart); }
+.book { display: grid; gap: 14px; align-content: start; }
+.book p { color: var(--ink-soft); }
+@media (max-width: 800px) { .two { grid-template-columns: 1fr; } }
+
+/* ---------------------------------------------------------------- how to play */
+.ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; margin-top: 40px; }
+.way {
+  background: var(--hole-2); border: 1px solid var(--hole-3); border-radius: 16px;
+  padding: 26px clamp(18px, 3vw, 30px); display: grid; gap: 16px; align-content: start; min-width: 0;
+}
+.way h3 { font-size: var(--step-2); color: var(--parchment); }
+.way p { color: var(--parchment-dim); }
+.steps { margin: 0; padding-left: 1.4em; display: grid; gap: 8px; color: var(--parchment-dim); }
+.steps li::marker { font-family: var(--display); color: var(--gold); }
+.note { font-size: var(--step--1); color: var(--parchment-dim); border-left: 3px solid var(--gold-deep); padding-left: 12px; }
+
+/* ---------------------------------------------------------------- credits */
+.credits { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 22px 32px; margin: 36px 0 0; }
+.credits div { display: grid; gap: 2px; }
+.credits dt { font-family: var(--caps); color: var(--gold); letter-spacing: 0.04em; }
+.credits dd { margin: 0; color: var(--parchment); }
+
+footer { border-top: 1px solid var(--hole-3); padding-block: 40px 56px; text-align: center; color: var(--parchment-dim); font-size: var(--step--1); }
+.grin { width: 150px; margin: 0 auto 14px; opacity: 0.85; animation: grin 9s ease-in-out infinite; }
+@keyframes grin { 0%, 100% { opacity: 0.85; } 45%, 55% { opacity: 0.12; } }
+</style>
+<script>
+  // The language: ?lang=en in the address, then the visitor's last choice, then the browser's.
+  (function () {
+    var lang;
+    try { lang = new URLSearchParams(location.search).get('lang'); } catch (e) {}
+    if (lang !== 'en' && lang !== 'pt-BR') {
+      try { lang = localStorage.getItem('alice-site-language'); } catch (e) {}
+    }
+    if (lang !== 'en' && lang !== 'pt-BR') lang = /^pt/i.test(navigator.language || '') ? 'pt-BR' : 'en';
+    document.documentElement.dataset.lang = lang;
+    document.documentElement.lang = lang;
+  })();
+</script>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top"><span>♥</span> Alice</a>
+    <nav aria-label="Seções">
+      <a href="#episodios"><span lang="pt-BR">Episódios</span><span lang="en">Episodes</span></a>
+      <a href="#familias"><span lang="pt-BR">Para as famílias</span><span lang="en">For families</span></a>
+      <a href="#jogar"><span lang="pt-BR">Como jogar</span><span lang="en">How to play</span></a>
+      <a href="#creditos"><span lang="pt-BR">Créditos</span><span lang="en">Credits</span></a>
+    </nav>
+    <div class="langs" role="group" aria-label="Idioma / Language">
+      <button type="button" id="lang-pt" data-set-lang="pt-BR" aria-pressed="true">PT</button>
+      <button type="button" id="lang-en" data-set-lang="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" aria-labelledby="hero-t">
+    <img src="img/hero.webp" alt="" width="1600" height="900" fetchpriority="high">
+    <div class="wrap">
+      <div class="hero-copy">
+        <p class="label"><span lang="pt-BR">Um jogo gratuito para toda a família</span><span lang="en">A free game for the whole family</span></p>
+        <h1 id="hero-t"><span lang="pt-BR">Alice no País das Maravilhas</span><span lang="en">Alice in Wonderland</span></h1>
+        <p class="lede" lang="pt-BR">Siga o Coelho Branco pela toca e viva o livro de Lewis Carroll em onze episódios: quebra-cabeças, conversas malucas e brincadeiras, do Salão das Portas ao julgamento das tortas.</p>
+        <p class="lede" lang="en">Follow the White Rabbit down the hole and live Lewis Carroll's book in eleven episodes: puzzles, mad conversations and games, from the Hall of Doors to the trial of the tarts.</p>
+        <div class="actions">
+          <a class="btn primary" href="jogar/?lang=pt-BR" lang="pt-BR">Jogar agora</a>
+          <a class="btn primary" href="jogar/?lang=en" lang="en">Play now</a>
+          <a class="btn" href="#jogar"><span lang="pt-BR">Baixar para Windows</span><span lang="en">Download for Windows</span></a>
+        </div>
+        <ul class="facts">
+          <li><span lang="pt-BR">Grátis, sem anúncios</span><span lang="en">Free, no ads</span></li>
+          <li><span lang="pt-BR">Português e inglês</span><span lang="en">Portuguese and English</span></li>
+          <li><span lang="pt-BR">No computador e no celular</span><span lang="en">On computers and phones</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band page" id="historia" aria-labelledby="historia-t">
+    <div class="wrap story">
+      <div class="story-copy">
+        <p class="label"><span lang="pt-BR">A história</span><span lang="en">The story</span></p>
+        <h2 id="historia-t"><span lang="pt-BR">“Ai, ai! Vou chegar atrasado!”</span><span lang="en">“Oh dear! I shall be late!”</span></h2>
+        <p class="opening" lang="pt-BR">Numa tarde de verão, Alice está sentada na beira do rio com a irmã quando passa correndo um Coelho Branco de colete, olhando o relógio. Ela vai atrás dele, cai na toca e começa a aventura mais curiosa da sua vida.</p>
+        <p class="opening" lang="en">One summer afternoon, Alice is sitting by the river with her sister when a White Rabbit in a waistcoat runs past, looking at his watch. She follows him, tumbles down the hole, and begins the most curious adventure of her life.</p>
+        <p lang="pt-BR">O jogo segue o livro capítulo por capítulo. Cada episódio mistura cenas para explorar com o mouse ou com o dedo, conversas em que você escolhe o que a Alice diz, e brincadeiras rápidas, sempre com um treino livre antes de valer.</p>
+        <p lang="en">The game follows the book chapter by chapter. Each episode mixes scenes to explore with a mouse or a finger, conversations where you choose what Alice says, and quick games, always with free practice before they count.</p>
+      </div>
+      <figure>
+        <img src="img/riverbank.webp" alt="" width="960" height="540" loading="lazy">
+        <figcaption><span lang="pt-BR">A beira do rio, onde tudo começa (Episódio 1).</span><span lang="en">The river bank, where it all begins (Episode 1).</span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band" id="episodios" aria-labelledby="episodios-t">
+    <div class="wrap">
+      <p class="label"><span lang="pt-BR">Onze episódios, onze cartas</span><span lang="en">Eleven episodes, eleven cards</span></p>
+      <h2 id="episodios-t"><span lang="pt-BR">Os episódios</span><span lang="en">The episodes</span></h2>
+      <p class="lede" lang="pt-BR">Um capítulo do livro em cada episódio, do primeiro ao último. Dá para começar por qualquer um. As cartas vão do Ás ao Valete de Copas, o acusado do julgamento final.</p>
+      <p class="lede" lang="en">One chapter of the book in each episode, from the first to the last. You can start with any of them. The cards run from the Ace to the Knave of Hearts, who stands trial at the end.</p>
+      <div class="deck">
+        <article class="card">
+          <div class="rank top" aria-hidden="true">A<span>♥</span></div>
+          <img src="img/ep01.webp" alt="" width="720" height="405" loading="lazy">
+          <p class="ep"><span lang="pt-BR">Episódio 1</span><span lang="en">Episode 1</span></p>
+          <h3><span lang="pt-BR">A Toca do Coelho</span><span lang="en">Down the Rabbit-Hole</span></h3>
+          <p lang="pt-BR">Siga o Coelho Branco, caia pela toca e descubra como passar pela portinha.</p>
+          <p lang="en">Follow the White Rabbit, fall down the hole and find a way through the tiny door.</p>
+          <div class="rank bottom" aria-hidden="true">A<span>♥</span></div>
+        </article>
+        <article class="card">
+          <div class="rank top" aria-hidden="true">2<span>♥</span></div>
+          <img src="img/ep02.webp" alt="" width="720" height="405" loading="lazy">
+          <p class="ep"><span lang="pt-BR">Episódio 2</span><span lang="en">Episode 2</span></p>
+          <h3><span lang="pt-BR">O Lago de Lágrimas</span><span lang="en">The Pool of Tears</span></h3>
+          <p lang="pt-BR">Nade no salão inundado, acalme o Rato e corra a Corrida em Roda.</p>
+          <p lang="en">Swim through the flooded hall, calm the Mouse and run the Caucus-race.</p>
+          <div class="rank bottom" aria-hidden="true">2<span>♥</span></div>
+        </article>
+        <article class="card">
+          <div class="rank top" aria-hidden="true">3<span>♥</span></div>
+          <img src="img/ep03.webp" alt="" width="720" height="405" loading="lazy">
+          <p class="ep"><span lang="pt-BR">Episódio 3</span><span lang="en">Episode 3</span></p>
+          <h3><span lang="pt-BR">A Casa do Coelho Branco</span><span lang="en">The White Rabbit's House</span></h3>
+          <p lang="pt-BR">Cresça até não caber na casa, escape do Pat e do Bill e brinque com um cachorrinho gigante.</p>
+          <p lang="en">Grow too big for the house, escape Pat and Bill and play with a giant puppy.</p>
+          <div class="rank bottom" aria-hidden="true">3<span>♥</span></div>
+        </article>
+        <article class="card">
+          <div class="rank top" aria-hidden="true">4<span>♥</span></div>
+          <img src="img/ep04.webp" alt="" width="720" height="405" loading="lazy">
+          <p class="ep"><span lang="pt-BR">Episódio 4</span><span lang="en">Episode 4</span></p>
+          <h3><span lang="pt-BR">Conselhos de uma Lagarta</span><span lang="en">Advice from a Caterpillar</span></h3>
+          <p lang="pt-BR">Os dois lados do cogumelo, os truques do Pai Guilherme e um pescoço comprido demais.</p>
+          <p lang="en">The two sides of the mushroom, Father William's tricks and a neck that is far too long.</p>
+          <div class="rank bottom" aria-hidden="true">4<span>♥</span></div>
+        </article>
+        <article class="card">
+          <div class="rank top" aria-hidden="true">5<span>♥</span></div>
+          <img src="img/ep05.webp" alt="" width="720" height="405" loading="lazy">
+          <p class="ep"><span lang="pt-BR">Episódio 5</span><span lang="en">Episode 5</span></p>
+          <h3><span lang="pt-BR">Porco e Pimenta</span><span lang="en">Pig and Pepper</span></h3>
+          <p lang="pt-BR">A cozinha da Duquesa, um bebê que vira porquinho e o Gato de Cheshire, que aparece e some.</p>
+          <p lang="en">The Duchess's kitchen, a baby that turns into a pig, and the Cheshire Cat, who comes and goes.</p>
+          <div class="rank bottom" aria-hidden="true">5<span>♥</span></div>
+        </article>
+        <article class="card">
+          <div class="rank top" aria-hidden="true">6<span>♥</span></div>
+          <img src="img/ep06.webp" alt="" width="720" height="405" loading="lazy">
+          <p class="ep"><span lang="pt-BR">Episódio 6</span><span lang="en">Episode 6</span></p>
+          <h3><span lang="pt-BR">Um Chá Maluco</span><span lang="en">A Mad Tea-Party</span></h3>
+          <p lang="pt-BR">Chá com o Chapeleiro, a Lebre de Março e o Arganaz, que vive pegando no sono.</p>
+          <p lang="en">Tea with the Hatter, the March Hare and the Dormouse, who keeps falling asleep.</p>
+          <div class="rank bottom" aria-hidden="true">6<span>♥</span></div>
+        </article>
+        <article class="card">
+          <div class="rank top" aria-hidden="true">7<span>♥</span></div>
+          <img src="img/ep07.webp" alt="" width="720" height="405" loading="lazy">
+          <p class="ep"><span lang="pt-BR">Episódio 7</span><span lang="en">Episode 7</span></p>
+          <h3><span lang="pt-BR">O Campo de Croqué da Rainha</span><span lang="en">The Queen's Croquet-Ground</span></h3>
+          <p lang="pt-BR">Pinte as rosas de vermelho antes que a Rainha chegue e jogue croqué com flamingos e ouriços.</p>
+          <p lang="en">Paint the roses red before the Queen arrives, and play croquet with flamingos and hedgehogs.</p>
+          <div class="rank bottom" aria-hidden="true">7<span>♥</span></div>
+        </article>
+        <article class="card">
+          <div class="rank top" aria-hidden="true">8<span>♥</span></div>
+          <img src="img/ep08.webp" alt="" width="720" height="405" loading="lazy">
+          <p class="ep"><span lang="pt-BR">Episódio 8</span><span lang="en">Episode 8</span></p>
+          <h3><span lang="pt-BR">A História da Tartaruga Falsa</span><span lang="en">The Mock Turtle's Story</span></h3>
+          <p lang="pt-BR">O queixo pontudo da Duquesa, os perdões do Rei e a escola do fundo do mar.</p>
+          <p lang="en">The Duchess's sharp chin, the King's pardons and the school at the bottom of the sea.</p>
+          <div class="rank bottom" aria-hidden="true">8<span>♥</span></div>
+        </article>
+        <article class="card">
+          <div class="rank top" aria-hidden="true">9<span>♥</span></div>
+          <img src="img/ep09.webp" alt="" width="720" height="405" loading="lazy">
+          <p class="ep"><span lang="pt-BR">Episódio 9</span><span lang="en">Episode 9</span></p>
+          <h3><span lang="pt-BR">A Quadrilha da Lagosta</span><span lang="en">The Lobster Quadrille</span></h3>
+          <p lang="pt-BR">Dance na praia, nade atrás das lagostas e encontre as rimas de um poema atrapalhado.</p>
+          <p lang="en">Dance on the beach, swim after the lobsters and find the rhymes in a muddled poem.</p>
+          <div class="rank bottom" aria-hidden="true">9<span>♥</span></div>
+        </article>
+        <article class="card">
+          <div class="rank top" aria-hidden="true">10<span>♥</span></div>
+          <img src="img/ep10.webp" alt="" width="720" height="405" loading="lazy">
+          <p class="ep"><span lang="pt-BR">Episódio 10</span><span lang="en">Episode 10</span></p>
+          <h3><span lang="pt-BR">Quem Roubou as Tortas?</span><span lang="en">Who Stole the Tarts?</span></h3>
+          <p lang="pt-BR">O julgamento do Valete, o Chapeleiro nervoso e uma torta de verdade, sem pimenta.</p>
+          <p lang="en">The Knave's trial, the nervous Hatter and a proper tart, with no pepper.</p>
+          <div class="rank bottom" aria-hidden="true">10<span>♥</span></div>
+        </article>
+        <article class="card">
+          <div class="rank top" aria-hidden="true">J<span>♥</span></div>
+          <img src="img/ep11.webp" alt="" width="720" height="405" loading="lazy">
+          <p class="ep"><span lang="pt-BR">Episódio 11</span><span lang="en">Episode 11</span></p>
+          <h3><span lang="pt-BR">O Depoimento de Alice</span><span lang="en">Alice's Evidence</span></h3>
+          <p lang="pt-BR">O júri de volta no lugar, o baralho inteiro voando e o despertar na beira do rio.</p>
+          <p lang="en">The jury back in place, a whole pack of cards in the air, and waking up by the river.</p>
+          <div class="rank bottom" aria-hidden="true">J<span>♥</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="personagens" aria-labelledby="personagens-t" style="padding-top: 0">
+    <div class="wrap">
+      <p class="label"><span lang="pt-BR">Quem é quem</span><span lang="en">Who's who</span></p>
+      <h2 id="personagens-t"><span lang="pt-BR">Personagens</span><span lang="en">Characters</span></h2>
+      <div class="cast">
+        <figure><img src="img/alice.webp" alt="" width="192" height="192" loading="lazy"><figcaption><b>Alice</b><span lang="pt-BR">Curiosa, educada e cheia de perguntas. Muda de tamanho o tempo todo.</span><span lang="en">Curious, polite and full of questions. Keeps changing size.</span></figcaption></figure>
+        <figure><img src="img/rabbit.webp" alt="" width="192" height="192" loading="lazy"><figcaption><b><span lang="pt-BR">Coelho Branco</span><span lang="en">White Rabbit</span></b><span lang="pt-BR">Sempre atrasado, sempre olhando o relógio.</span><span lang="en">Always late, always looking at his watch.</span></figcaption></figure>
+        <figure><img src="img/caterpillar.webp" alt="" width="192" height="192" loading="lazy"><figcaption><b><span lang="pt-BR">Lagarta</span><span lang="en">Caterpillar</span></b><span lang="pt-BR">Sentada num cogumelo, só sabe perguntar: “Quem é você?”</span><span lang="en">Sits on a mushroom and only asks: “Who are you?”</span></figcaption></figure>
+        <figure><img src="img/cat.webp" alt="" width="192" height="192" loading="lazy"><figcaption><b><span lang="pt-BR">Gato de Cheshire</span><span lang="en">Cheshire Cat</span></b><span lang="pt-BR">Aparece, some e deixa só o sorriso.</span><span lang="en">Appears, vanishes, and leaves only the grin.</span></figcaption></figure>
+        <figure><img src="img/duchess.webp" alt="" width="192" height="192" loading="lazy"><figcaption><b><span lang="pt-BR">Duquesa</span><span lang="en">Duchess</span></b><span lang="pt-BR">Acha uma moral para tudo. E tem um queixo muito pontudo.</span><span lang="en">Finds a moral in everything. And has a very sharp chin.</span></figcaption></figure>
+        <figure><img src="img/queen.webp" alt="" width="192" height="192" loading="lazy"><figcaption><b><span lang="pt-BR">Rainha de Copas</span><span lang="en">Queen of Hearts</span></b><span lang="pt-BR">“Cortem a cabeça!” Para ela, tudo se resolve assim.</span><span lang="en">“Off with their heads!” Her answer to everything.</span></figcaption></figure>
+        <figure><img src="img/gryphon.webp" alt="" width="192" height="192" loading="lazy"><figcaption><b><span lang="pt-BR">Grifo</span><span lang="en">Gryphon</span></b><span lang="pt-BR">Meio águia, meio leão, e muito preguiçoso.</span><span lang="en">Half eagle, half lion, and very lazy.</span></figcaption></figure>
+        <figure><img src="img/mockturtle.webp" alt="" width="192" height="192" loading="lazy"><figcaption><b><span lang="pt-BR">Tartaruga Falsa</span><span lang="en">Mock Turtle</span></b><span lang="pt-BR">Chora contando da escola no fundo do mar.</span><span lang="en">Sobs about his school at the bottom of the sea.</span></figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="imagens" aria-labelledby="imagens-t" style="padding-top: 0">
+    <div class="wrap">
+      <p class="label"><span lang="pt-BR">Do jogo</span><span lang="en">From the game</span></p>
+      <h2 id="imagens-t"><span lang="pt-BR">Imagens</span><span lang="en">Pictures</span></h2>
+      <div class="gallery">
+        <figure>
+          <img lang="pt-BR" src="img/shot-race-pt.webp" alt="A Alice correndo na Corrida em Roda, na beira do lago." width="960" height="540" loading="lazy">
+          <img lang="en" src="img/shot-race-en.webp" alt="Alice running the Caucus-race by the pool." width="960" height="540" loading="lazy">
+          <figcaption><span lang="pt-BR">Episódio 2: uma Corrida em Roda para secar.</span><span lang="en">Episode 2: a Caucus-race to get dry.</span></figcaption>
+        </figure>
+        <figure>
+          <img lang="pt-BR" src="img/shot-giant-pt.webp" alt="A Alice, gigante, com o braço para fora da janela da casa do Coelho." width="960" height="540" loading="lazy">
+          <img lang="en" src="img/shot-giant-en.webp" alt="Giant Alice with her arm out of the White Rabbit's window." width="960" height="540" loading="lazy">
+          <figcaption><span lang="pt-BR">Episódio 3: grande demais para a casa do Coelho.</span><span lang="en">Episode 3: too big for the White Rabbit's house.</span></figcaption>
+        </figure>
+        <figure>
+          <img lang="pt-BR" src="img/shot-twinkle-pt.webp" alt="O Chapeleiro e a Lebre de Março à mesa, com seis xícaras coloridas." width="960" height="540" loading="lazy">
+          <img lang="en" src="img/shot-twinkle-en.webp" alt="The Hatter and the March Hare at the table, with six coloured teacups." width="960" height="540" loading="lazy">
+          <figcaption><span lang="pt-BR">Episódio 6: cante com o Chapeleiro nas xícaras.</span><span lang="en">Episode 6: sing along with the Hatter on the teacups.</span></figcaption>
+        </figure>
+        <figure>
+          <img lang="pt-BR" src="img/shot-croquet-pt.webp" alt="O campo de croqué da Rainha, com flamingos e ouriços." width="960" height="540" loading="lazy">
+          <img lang="en" src="img/shot-croquet-en.webp" alt="The Queen's croquet-ground, with flamingos and hedgehogs." width="960" height="540" loading="lazy">
+          <figcaption><span lang="pt-BR">Episódio 7: croqué com flamingos e ouriços.</span><span lang="en">Episode 7: croquet with flamingos and hedgehogs.</span></figcaption>
+        </figure>
+        <figure>
+          <img lang="pt-BR" src="img/shot-court-pt.webp" alt="O tribunal do Rei e da Rainha de Copas, com o júri e as tortas." width="960" height="540" loading="lazy">
+          <img lang="en" src="img/shot-court-en.webp" alt="The court of the King and Queen of Hearts, with the jury and the tarts." width="960" height="540" loading="lazy">
+          <figcaption><span lang="pt-BR">Episódio 10: quem é quem no tribunal.</span><span lang="en">Episode 10: who's who in the court.</span></figcaption>
+        </figure>
+        <figure>
+          <img lang="pt-BR" src="img/shot-cards-pt.webp" alt="O baralho inteiro voando para cima da Alice, no tribunal." width="960" height="540" loading="lazy">
+          <img lang="en" src="img/shot-cards-en.webp" alt="The whole pack of cards flying at Alice in the court." width="960" height="540" loading="lazy">
+          <figcaption><span lang="pt-BR">Episódio 11: o baralho inteiro de uma vez!</span><span lang="en">Episode 11: the whole pack at once!</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="band page" id="familias" aria-labelledby="familias-t">
+    <div class="wrap two">
+      <div>
+        <p class="label"><span lang="pt-BR">Para as famílias</span><span lang="en">For families</span></p>
+        <h2 id="familias-t"><span lang="pt-BR">Feito para jogar junto</span><span lang="en">Made to play together</span></h2>
+        <ul class="notes">
+          <li lang="pt-BR">Grátis, sem anúncios e sem cadastro.</li>
+          <li lang="en">Free, with no ads and no sign-up.</li>
+          <li lang="pt-BR">O jogo não coleta dados: o progresso fica guardado só no aparelho.</li>
+          <li lang="en">The game collects no data: progress is saved only on the device.</li>
+          <li lang="pt-BR">Toda brincadeira começa com um treino livre, sem tempo e sem contar nada. Só vale quando a criança toca em Começar.</li>
+          <li lang="en">Every game starts with free practice, untimed and with nothing counted. It only counts once the child taps Start.</li>
+          <li lang="pt-BR">Quando não souber o que fazer, toque no camafeu lá em cima: a Alice dá uma dica.</li>
+          <li lang="en">Stuck? Tap the cameo at the top, and Alice gives a hint.</li>
+          <li lang="pt-BR">Tem bastante leitura: os menores aproveitam mais com um adulto lendo junto.</li>
+          <li lang="en">There's a fair amount of reading: younger children enjoy it most with a grown-up reading along.</li>
+          <li lang="pt-BR">Testado por uma família de verdade, no computador e no celular.</li>
+          <li lang="en">Playtested by a real family, on computers and phones.</li>
+        </ul>
+      </div>
+      <div class="book">
+        <p class="label"><span lang="pt-BR">O livro</span><span lang="en">The book</span></p>
+        <h2><span lang="pt-BR">Lewis Carroll, 1865</span><span lang="en">Lewis Carroll, 1865</span></h2>
+        <p lang="pt-BR"><i>Alice's Adventures in Wonderland</i> foi escrito por Lewis Carroll e publicado em 1865, com ilustrações de John Tenniel. Hoje é uma obra de domínio público.</p>
+        <p lang="en"><i>Alice's Adventures in Wonderland</i> was written by Lewis Carroll and published in 1865, with illustrations by John Tenniel. It is now in the public domain.</p>
+        <p lang="pt-BR">Este jogo é uma adaptação livre, com a arte inspirada nas ilustrações originais. Os poemas e trocadilhos ganharam versões novas em português.</p>
+        <p lang="en">This game is a free adaptation, with art inspired by the original illustrations.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="jogar" aria-labelledby="jogar-t">
+    <div class="wrap">
+      <p class="label"><span lang="pt-BR">Duas maneiras</span><span lang="en">Two ways</span></p>
+      <h2 id="jogar-t"><span lang="pt-BR">Como jogar</span><span lang="en">How to play</span></h2>
+      <div class="ways">
+        <div class="way">
+          <h3><span lang="pt-BR">No navegador</span><span lang="en">In the browser</span></h3>
+          <p lang="pt-BR">No computador, no tablet ou no celular, sem instalar nada. No celular, vire a tela de lado.</p>
+          <p lang="en">On a computer, a tablet or a phone, with nothing to install. On a phone, turn it sideways.</p>
+          <div class="actions">
+            <a class="btn primary" href="jogar/?lang=pt-BR" lang="pt-BR">Jogar agora</a>
+            <a class="btn primary" href="jogar/?lang=en" lang="en">Play now</a>
+          </div>
+          <p class="note" lang="pt-BR">Cada episódio baixa as suas imagens e sons quando é escolhido, por isso precisa de internet.</p>
+          <p class="note" lang="en">Each episode downloads its pictures and sounds when you choose it, so it needs an internet connection.</p>
+        </div>
+        <div class="way">
+          <h3><span lang="pt-BR">No Windows</span><span lang="en">On Windows</span></h3>
+          <ol class="steps" lang="pt-BR">
+            <li>Baixe o arquivo ZIP.</li>
+            <li>Clique nele com o botão direito e escolha <b>Extrair tudo</b>.</li>
+            <li>Abra a pasta e dê um clique duplo em <b>Alice.exe</b>.</li>
+          </ol>
+          <ol class="steps" lang="en">
+            <li>Download the ZIP file.</li>
+            <li>Right-click it and choose <b>Extract All</b>.</li>
+            <li>Open the folder and double-click <b>Alice.exe</b>.</li>
+          </ol>
+          <div class="actions">
+            <a class="btn" href="https://github.com/fbrandao2k/alice-no-pais-das-maravilhas/releases/latest/download/AliceNoPaisDasMaravilhas-Windows.zip"><span lang="pt-BR">Baixar para Windows</span><span lang="en">Download for Windows</span> <small>ZIP, 291 MB</small></a>
+          </div>
+          <p class="note" lang="pt-BR">Depois de baixado, joga sem internet. Se aparecer “O Windows protegeu o computador”, clique em <b>Mais informações</b> e depois em <b>Executar assim mesmo</b>: o aviso aparece porque o jogo é gratuito e não tem assinatura paga.</p>
+          <p class="note" lang="en">Once downloaded, it plays offline. If “Windows protected your PC” appears, click <b>More info</b> and then <b>Run anyway</b>: the warning shows because the game is free and has no paid signature.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="creditos" aria-labelledby="creditos-t" style="padding-top: 0">
+    <div class="wrap">
+      <p class="label"><span lang="pt-BR">Quem fez</span><span lang="en">Who made it</span></p>
+      <h2 id="creditos-t"><span lang="pt-BR">Créditos</span><span lang="en">Credits</span></h2>
+      <dl class="credits">
+        <div><dt><span lang="pt-BR">Criação</span><span lang="en">Created by</span></dt><dd>fbrandao2k</dd></div>
+        <div><dt><span lang="pt-BR">Roteiro e programação</span><span lang="en">Story and programming</span></dt><dd>Claude (Anthropic)</dd></div>
+        <div><dt><span lang="pt-BR">Arte e áudio</span><span lang="en">Art and audio</span></dt><dd>Codex (OpenAI)</dd></div>
+        <div><dt><span lang="pt-BR">Testes</span><span lang="en">Playtesting</span></dt><dd><span lang="pt-BR">A família</span><span lang="en">The family</span></dd></div>
+        <div><dt><span lang="pt-BR">O livro</span><span lang="en">The book</span></dt><dd><span lang="pt-BR">Lewis Carroll (1865), domínio público; estilo inspirado em John Tenniel</span><span lang="en">Lewis Carroll (1865), public domain; style inspired by John Tenniel</span></dd></div>
+        <div><dt><span lang="pt-BR">Fontes e motor</span><span lang="en">Fonts and engine</span></dt><dd><span lang="pt-BR">Alegreya e IM Fell English (SIL Open Font License); feito com Phaser</span><span lang="en">Alegreya and IM Fell English (SIL Open Font License); made with Phaser</span></dd></div>
+      </dl>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <img class="grin" src="img/grin.webp" alt="" width="312" height="60" loading="lazy">
+    <p><span lang="pt-BR">Alice no País das Maravilhas · um jogo gratuito · 2026</span><span lang="en">Alice in Wonderland · a free game · 2026</span></p>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var buttons = document.querySelectorAll('[data-set-lang]');
+    function show(lang) {
+      root.dataset.lang = lang;
+      root.lang = lang;
+      document.title = lang === 'en' ? 'Alice in Wonderland' : 'Alice no País das Maravilhas';
+      buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.setLang === lang)); });
+    }
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () {
+        show(b.dataset.setLang);
+        try { localStorage.setItem('alice-site-language', b.dataset.setLang); } catch (e) {}
+      });
+    });
+    show(root.dataset.lang || 'pt-BR');
+  })();
+</script>

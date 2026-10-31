@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <title>Alice no País das Maravilhas</title>
+    <meta name="description" content="Uma aventura de quebra-cabeça em português, baseada no livro de Lewis Carroll (1865)." />
+    <meta name="theme-color" content="#1c1410" />
+    <meta property="og:title" content="Alice no País das Maravilhas — Episódio 1: A Toca do Coelho" />
+    <meta property="og:description" content="Siga o Coelho Branco, mude de tamanho e descubra como passar pela portinha do Salão das Portas." />
+    <meta property="og:image" content="social.jpg" />
+    <link rel="icon" type="image/png" href="icon-64.png" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #120d0a;
+        overflow: hidden;
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      #game {
+        position: fixed;
+        inset: 0;
+      }
+      #rotate {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        background: #1c1410;
+        color: #f3e6c8;
+        font: 22px Georgia, serif;
+        text-align: center;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      #rotate span {
+        font-size: 64px;
+        display: block;
+        margin-bottom: 12px;
+      }
+      @media (orientation: portrait) and (pointer: coarse) {
+        #rotate {
+          display: flex;
+        }
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index-g9ta9Wxw.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Cy6T2f34.css">
+  </head>
+  <body>
+    <div id="game"></div>
+    <div id="rotate">
+      <span>⟳</span>
+      <div id="rotate-message">Gire o aparelho para jogar na horizontal.</div>
+    </div>
+  </body>
+</html>
