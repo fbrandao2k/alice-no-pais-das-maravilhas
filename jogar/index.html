@@ -27,6 +27,31 @@
         position: fixed;
         inset: 0;
       }
+      /* Screens wider than the game's 16:9 (most phones) show margins at the sides: there, a
+         stage curtain on each side, the paper theatre's own (main.ts sets --curtain), dark and
+         muted so it frames the game without drawing the eye. Narrower screens keep the plain dark
+         bars. */
+      @media (min-aspect-ratio: 16/9) {
+        #game::before,
+        #game::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 50%;
+          z-index: -1;
+          pointer-events: none;
+          background: var(--curtain, none) left top / auto 100% repeat-x;
+          filter: brightness(0.3) saturate(0.65);
+        }
+        #game::before {
+          left: 0;
+        }
+        #game::after {
+          right: 0;
+          transform: scaleX(-1);
+        }
+      }
       #rotate {
         display: none;
         position: fixed;
@@ -46,14 +71,17 @@
         display: block;
         margin-bottom: 12px;
       }
-      @media (orientation: portrait) and (pointer: coarse) {
+      /* "Turn your device" only where the game would be too small to play upright: a touch
+         screen less than 600 px wide (a phone). Tablets, foldables and wide enough split-screen
+         windows show the whole game with dark bars above and below. src/hold.ts pauses the game
+         with this same query. */
+      @media (orientation: portrait) and (pointer: coarse) and (max-width: 599.98px) {
         #rotate {
           display: flex;
         }
       }
     </style>
-    <script type="module" crossorigin src="./assets/index-CyXj72Dl.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-Cy6T2f34.css">
+    <script type="module" crossorigin src="./assets/index-D_R0I5CT.js"></script>
   </head>
   <body>
     <div id="game"></div>
